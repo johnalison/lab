@@ -9,3 +9,10 @@ C-x C-k e; Edit macro
 (global-set-key "\M-." 'point-to-bottom)
 (global-set-key "\M-!" 'line-to-top)
 (global-set-key "\M-_" 'unscroll)
+
+
+# External Packages
+
+git clone git@github.com:johnalison/obsidian.el.git
+git clone git@github.com:johnalison/markdown-mode.git
+
