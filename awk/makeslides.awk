@@ -87,17 +87,23 @@ function slideWithPlots(){
 	"\\begin{picture}(10,8) \n"					
     outputText = outputText sprintf(exampleSlide)
 
-    offSets[1] = "0.45 ,3.8"
-    offSets[2] = "5.45 ,3.8"
-    offSets[3] = "0.45,-0.4"
-    offSets[4] = "5.45 ,-0.4"
+    #offSets[1] = "0.45 ,3.8"
+    #offSets[2] = "5.45 ,3.8"
+    #offSets[3] = "0.45,-0.6"
+    #offSets[4] = "5.45 ,-0.6"
+
+    offSets[1] = "0.45 ,3.1"
+    offSets[2] = "5.45 ,3.1"
+    offSets[3] = "0.45,-1.2"
+    offSets[4] = "5.45 ,-1.2"
+    
     
     for (iPlot=1; iPlot<=NF; iPlot++){
-	exampleSlide = "\\put(%s){\\includegraphics[width=1.8in]{%s/%s/%s.pdf}}\n" 
+	exampleSlide = "\\put(%s){\\includegraphics[width=1.75in]{%s/%s/%s.pdf}}\n" 
 	outputText = outputText sprintf(exampleSlide,offSets[iPlot],topDir,subDir,$iPlot)
     }
+    outputText = outputText sprintf("\\put(4,7.6){\\textcolor{myred}{\\huge %s}}  \n",slideTitle)
     outputText = outputText "\\end{picture}\n"	
-    outputText = outputText sprintf("\\frametitle{\\centerline{\\textcolor{myblack}{%s}}}  \n",slideTitle)
     outputText = outputText "\\end{frame}\n"			
 
     return outputText
@@ -150,19 +156,25 @@ function printTitle(){
     
     header = "\\title{\\huge \\textcolor{myblue}{{%s }}}\n"			\
 	"\\author{\\textcolor{cmured}{{\\Large \\\\%s\\\\}}\n" \
+	"\\vspace*{1cm} \n" \
 	"  \\textit{\\Large %s}\n" 
     printf(header, title, names, institution)
 
     header = "}\n"		     \
 	"\\date{  } \n" \
 	"\n" \
-	"\\logo{\n" \
-	"\\begin{picture}(10,8) \n" \
-	"\\put(-2.5,7.6){\\includegraphics[height=0.5in]{CMSlogo_outline_black_red_nolabel_May2014.pdf}}\n" \
-	"\\put(8.2,7.7){\\includegraphics[height=0.45in]{CMU_Logo_Stack_Red.eps}}\n" \
-	"\\end{picture}\n" \
-	"}\n" \
-	"\n" \
+	"\\usepackage{tikz} \n"			\
+	"\\titlegraphic { \n" \
+	"\\begin{tikzpicture}[overlay,remember picture] \n" \
+	"\\node[left=0.2cm] at (current page.30){ \n" \
+	"\\includegraphics[width=0.6in]{CMSlogo_outline_black_red_nolabel_May2014.pdf} \n" \
+	"};\n" \
+	"\\node[right=0.2cm] at (current page.150){ \n" \
+	"\\includegraphics[width=0.8in]{CMU_Logo_Stack_Red.eps} \n" \
+	"}; \n" \
+	"\\end{tikzpicture} \n" \
+	"} \n" \
+	"\n"					   \
 	"\\beamertemplatenavigationsymbolsempty\n" \
 	"\n" \
 	"\\unitlength=1cm\n" \
