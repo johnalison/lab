@@ -56,6 +56,13 @@ jetclustering_slides_UL16_postVFP:
 jetclustering_slides_Run3:
 	$(MAKE) jetclustering_slides_year YEAR=Run3
 
+jetclustering_slides_Run3_all:
+	$(MAKE) jetclustering_slides_year YEAR=Run3
+	$(MAKE) jetclustering_slides_year YEAR=2022_preEE
+	$(MAKE) jetclustering_slides_year YEAR=2022_EE
+	$(MAKE) jetclustering_slides_year YEAR=2023_preBPix
+	$(MAKE) jetclustering_slides_year YEAR=2023_BPix
+
 jetclustering_slides_2022_preEE:
 	$(MAKE) jetclustering_slides_year YEAR=2022_preEE
 
