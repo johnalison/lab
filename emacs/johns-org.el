@@ -253,11 +253,31 @@
   :custom
   (org-roam-directory "~/RoamNotes")
   (org-roam-completion-everywhere t)
+  (org-roam-dailies-capture-templates
+   '(("d" "default" entry  (file "~/RoamNotes/Templates/DailyTemplate.org")
+      :if-new (file+head "%<%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n"))))
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
+      :unnarrowed t)))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert)
          :map org-mode-map
          ("C-M-i"    . completion-at-point))
+  :bind-keymap
+  ("C-c n d" . org-roam-dailies-map)
   :config
+  (require 'org-roam-dailies) ;; Ensure the keymap is available
+  ;; Configure backlinks buffer to always appear at the bottom
+  (add-to-list 'display-buffer-alist
+               '("\\*org-roam\\*"
+                 (display-buffer-in-side-window)
+                 (side . bottom)
+                 (slot . 0)
+                 (window-width . 0.33)
+                 (window-height . 0.4)
+                 (window-parameters . ((no-delete-other-windows . t)))))
   (org-roam-setup))
 (org-roam-db-autosync-mode)
