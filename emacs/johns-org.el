@@ -285,11 +285,48 @@
   (org-roam-setup))
 (org-roam-db-autosync-mode)
 
-(global-set-key (kbd "s-d") 'org-roam-dailies-goto-today)
-(global-set-key (kbd "s-c") 'org-roam-dailies-goto-date)
-(global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
-(global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
-(global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
 
 
 (require 'org-roam-dailies)
+
+;;; ------------------------------------------------------------
+;;;  Org‑roam daily: open‑or‑create (always ask for a date)
+;;; ------------------------------------------------------------
+
+;; ---------- helper: build the daily file path ---------------------------
+(defun my/roam‑daily--filepath (time)
+  "Return the absolute path of the Org‑roam daily note for TIME."
+  (let* ((name (format-time-string "%d-%B-%Y-%A.org" time))
+         (dir  (expand-file-name org-roam-dailies-directory
+                                 org-roam-directory)))
+    (expand-file-name name dir)))
+
+;; ---------- main command -------------------------------------------------
+(defun my/roam‑daily-open-or-create ()
+  "Prompt for a date, then open that daily note or create it from template.
+
+The capture template identified by key \"d\" in
+`org-roam-dailies-capture-templates' is used when the note does not yet
+exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
+  (interactive)
+  ;; `org-read-date' → time value because 2nd arg = t
+  (let* ((time (org-read-date nil t nil "Date (pick in calendar): "))
+         (file (my/roam‑daily--filepath time)))
+    ;; create parent directory on first use
+    (unless (file-directory-p (file-name-directory file))
+      (make-directory (file-name-directory file) :parents))
+    (if (file-exists-p file)
+        ;; ─── file exists → just open it (GOTO = t) ───
+        (org-roam-dailies--capture time t "d")
+      ;; ─── file absent → create via template "d" (GOTO = nil) ───
+      (org-roam-dailies--capture time nil "d"))))
+
+;; ---------- optional keybinding -----------------------------------------
+;; C‑c n o  (o for “open daily”)
+;;(define-key org-mode-map (kbd "C-c n o") #'my/roam‑daily-open-or-create)
+
+(global-set-key (kbd "s-d") 'org-roam-dailies-goto-today)
+(global-set-key (kbd "s-c") 'my/roam‑daily-open-or-create)
+(global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
+(global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
+(global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
