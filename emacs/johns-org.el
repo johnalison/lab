@@ -23,10 +23,10 @@
 
 
   ;; Set faces for heading levels with colors
-  (set-face-attribute 'org-level-1 nil :font "Lucida Grande" :weight 'bold    :height 2.0 ) ;:foreground "purple")
-  (set-face-attribute 'org-level-2 nil :font "Lucida Grande" :weight 'bold    :height 1.4 ) ;:foreground "black")
-  (set-face-attribute 'org-level-3 nil :font "Lucida Grande" :weight 'regular :height 1.3 ) ;:foreground "yellow")
-  (set-face-attribute 'org-level-4 nil :font "Lucida Grande" :weight 'regular :height 1.0 ) ;:foreground "green")
+  (set-face-attribute 'org-level-1 nil :font "Lucida Grande" :weight 'bold    :height 1.1 ) ;:foreground "purple")
+  (set-face-attribute 'org-level-2 nil :font "Lucida Grande" :weight 'bold    :height 1.1 ) ;:foreground "black")
+  (set-face-attribute 'org-level-3 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "yellow")
+  (set-face-attribute 'org-level-4 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "green")
   (set-face-attribute 'org-level-5 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "blue")
   (set-face-attribute 'org-level-6 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "purple")
   (set-face-attribute 'org-level-7 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "magenta")
@@ -174,18 +174,18 @@
       ("tt" "Task" entry (file+olp "~/RoamNotes/Tasks.org" "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-      ("j" "Journal Entries")
-      ("jj" "Journal" entry
-           (file+olp+datetree "~/RoamNotes/Journal.org")
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume
-           :empty-lines 1)
-      ("jm" "Meeting" entry
-           (file+olp+datetree "~/RoamNotes/Journal.org")
-           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-           :clock-in :clock-resume
-           :empty-lines 1)
+      ;;("j" "Journal Entries")
+      ;;("jj" "Journal" entry
+      ;;     (file+olp+datetree "~/RoamNotes/Journal.org")
+      ;;     "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+      ;;     ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+      ;;     :clock-in :clock-resume
+      ;;     :empty-lines 1)
+      ;;("jm" "Meeting" entry
+      ;;     (file+olp+datetree "~/RoamNotes/Journal.org")
+      ;;     "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+      ;;     :clock-in :clock-resume
+      ;;     :empty-lines 1)
 
       ;;("w" "Workflows")
       ;;("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
@@ -252,15 +252,18 @@
   :ensure t
   :custom
   (org-roam-directory "~/RoamNotes")
+  (org-roam-dailies-directory   "Journal/")
   (org-roam-completion-everywhere t)
   (org-roam-dailies-capture-templates
-   '(("d" "default" entry  (file "~/RoamNotes/Templates/DailyTemplate.org")
-      :if-new (file+head "%<%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n"))))
-  (org-roam-capture-templates
-   '(("d" "default" plain
-      "%?"
-      :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
-      :unnarrowed t)))
+   '(("d" "default" entry
+      (file "~/RoamNotes/Templates/DailyTemplate.org")
+      :target (file+head "%<%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n")))
+   )
+  ;;(org-roam-capture-templates
+  ;; '(("d" "default" plain
+  ;;    "%?"
+  ;;    :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
+  ;;    :unnarrowed t)))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert)
@@ -281,3 +284,12 @@
                  (window-parameters . ((no-delete-other-windows . t)))))
   (org-roam-setup))
 (org-roam-db-autosync-mode)
+
+(global-set-key (kbd "s-d") 'org-roam-dailies-goto-today)
+(global-set-key (kbd "s-c") 'org-roam-dailies-goto-date)
+(global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
+(global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
+(global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
+
+
+(require 'org-roam-dailies)
