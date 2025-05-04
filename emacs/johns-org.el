@@ -259,11 +259,11 @@
       (file "~/RoamNotes/Templates/DailyTemplate.org")
       :target (file+head "%<%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n")))
    )
-  ;;(org-roam-capture-templates
-  ;; '(("d" "default" plain
-  ;;    "%?"
-  ;;    :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
-  ;;    :unnarrowed t)))
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
+      :unnarrowed t)))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert)
@@ -330,3 +330,10 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
 (global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
 (global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
 (global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
+
+;; After org is loaded, remove TAB’s org-cycle binding so the global TAB works
+;(with-eval-after-load 'org
+;  (define-key org-mode-map (kbd "TAB") nil))
+
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "<backtab>") nil))
