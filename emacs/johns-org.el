@@ -23,7 +23,8 @@
 
 
   ;; Set faces for heading levels with colors
-  (set-face-attribute 'org-level-1 nil :font "Lucida Grande" :weight 'bold    :height 1.1 ) ;:foreground "purple")
+  ;;(set-face-attribute 'org-level-1 nil :font "Lucida Grande" :weight 'bold    :height 1.1 :foreground "#8350ef")
+  (set-face-attribute 'org-level-1 nil :font "Lucida Grande" :weight 'bold    :height 1.1 :foreground "mediumblue")
   (set-face-attribute 'org-level-2 nil :font "Lucida Grande" :weight 'bold    :height 1.1 ) ;:foreground "black")
   (set-face-attribute 'org-level-3 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "yellow")
   (set-face-attribute 'org-level-4 nil :font "Lucida Grande" :weight 'regular :height 1.1 ) ;:foreground "green")
@@ -63,7 +64,9 @@
   (setq org-ellipsis " ▾")
   (setq org-agenda-files
 	'("~/RoamNotes/Tasks.org"
+	  "~/RoamNotes/Archive.org"
 	  "~/RoamNotes/Birthdays.org"
+	  "~/RoamNotes/gcal.org"
 	  ))
   (setq org-hide-emphasis-markers t)
   (setq org-hide-block-startup t)
@@ -75,13 +78,14 @@
 
 
   (setq org-todo-keywords
-	'((sequence "TODO(t)" "The ONE thing(o)" "Someday Maybe(s)" "Waiting(w)" "|" "DONE(d!)")
+	'((sequence "TODO(t)" "The ONE thing(o)" "Now(n)" "Someday Maybe(s)" "Waiting(w)" "|" "DONE(d!)")
 	  ;(sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)"))
 	  ))
 
   (setq org-refile-targets
     '(("Archive.org" :maxlevel . 1)
-      ("Tasks.org" :maxlevel . 1)))
+      ("Tasks.org" :maxlevel . 1)
+      ))
 
   ;; Save Org buffers after refiling!
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -110,8 +114,8 @@
      ((agenda "" ((org-deadline-warning-days 7)))
       (todo "The ONE thing"
             ((org-agenda-overriding-header "The ONE Thing")))
-      (todo "TODO"
-            ((org-agenda-overriding-header "Open Items")))
+      (todo "Now"
+            ((org-agenda-overriding-header "To do:")))
       (todo "Waiting"
             ((org-agenda-overriding-header "Waiting on")))
       ;;(tags-todo "agenda/Waiting" ((org-agenda-overriding-header "Waiting on")))
@@ -120,6 +124,11 @@
     ("t" "To do"
      ((todo "TODO"
             ((org-agenda-overriding-header "Open Items")))))
+
+    ("n" "To do now"
+     ((todo "Now"
+            ((org-agenda-overriding-header "Now:")))))
+
 
     ("o" "The ONE Thing"
      ((todo "The ONE thing"
@@ -130,13 +139,13 @@
 	    ((org-agenda-overriding-header "Someday Maybe")))))
 
     ;; The + [tag-name] means that the tag is required the - [tag-name] means that the tag is excluded
-    ("W" "Work Tasks" tags-todo "+work-email")
+    ;;("W" "Work Tasks" tags-todo "+work-email")
 
     ;; Low-effort next actions
-    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-     ((org-agenda-overriding-header "Low Effort Tasks")
-      (org-agenda-max-todos 20)
-      (org-agenda-files org-agenda-files)))
+    ;;("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+    ;; ((org-agenda-overriding-header "Low Effort Tasks")
+    ;;  (org-agenda-max-todos 20)
+    ;;  (org-agenda-files org-agenda-files)))
 
     ;("w" "Workflow Status"
     ; ((todo "WAIT"
@@ -168,11 +177,16 @@
     ))
 
   (setq org-capture-templates
-    `(("t" "Tasks / Projects")
+	`(("a" "Appointment" entry (file "~/RoamNotes/gcal.org" )
+	   ;;"* %?\n\n%^T\n\n:PROPERTIES:\n\n:END:\n\n")
+	   "* %?")
+	  ("t" "Tasks / Projects")
 
       ;; %? is for the cursor /  %U is the time stamp  / %a is the link to the file / %i is the current region
-      ("tt" "Task" entry (file+olp "~/RoamNotes/Tasks.org" "Inbox")
+	  ("tt" "Task" entry (file+olp "~/RoamNotes/Tasks.org" "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+      ;;("tp" "Task from Point" entry (file+olp "~/RoamNotes/Tasks.org" "Inbox")
+      ;;     "* TODO %a\n  %U\n  %?\n  " :empty-lines 1)
 
       ;;("j" "Journal Entries")
       ;;("jj" "Journal" entry
@@ -261,8 +275,8 @@
    )
   (org-roam-capture-templates
    '(("d" "default" plain
-      "%?"
-      :if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
+      "\n\n * %?\n"
+      :if-new (file+head "Notes/${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
       :unnarrowed t)))
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
@@ -294,15 +308,15 @@
 ;;; ------------------------------------------------------------
 
 ;; ---------- helper: build the daily file path ---------------------------
-(defun my/roam‑daily--filepath (time)
-  "Return the absolute path of the Org‑roam daily note for TIME."
+(defun my/roam-daily--filepath (time)
+  "Return the absolute path of the Org-roam daily note for TIME."
   (let* ((name (format-time-string "%d-%B-%Y-%A.org" time))
          (dir  (expand-file-name org-roam-dailies-directory
                                  org-roam-directory)))
     (expand-file-name name dir)))
 
 ;; ---------- main command -------------------------------------------------
-(defun my/roam‑daily-open-or-create ()
+(defun my/roam-daily-open-or-create ()
   "Prompt for a date, then open that daily note or create it from template.
 
 The capture template identified by key \"d\" in
@@ -311,7 +325,7 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
   (interactive)
   ;; `org-read-date' → time value because 2nd arg = t
   (let* ((time (org-read-date nil t nil "Date (pick in calendar): "))
-         (file (my/roam‑daily--filepath time)))
+         (file (my/roam-daily--filepath time)))
     ;; create parent directory on first use
     (unless (file-directory-p (file-name-directory file))
       (make-directory (file-name-directory file) :parents))
@@ -321,15 +335,62 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
       ;; ─── file absent → create via template "d" (GOTO = nil) ───
       (org-roam-dailies--capture time nil "d"))))
 
-;; ---------- optional keybinding -----------------------------------------
-;; C‑c n o  (o for “open daily”)
-;;(define-key org-mode-map (kbd "C-c n o") #'my/roam‑daily-open-or-create)
 
-(global-set-key (kbd "s-d") 'org-roam-dailies-goto-today)
-(global-set-key (kbd "s-c") 'my/roam‑daily-open-or-create)
+(defun my/roam-dailies--today-filepath ()
+  "Return the absolute path of today’s Org-roam daily note."
+  (let* ((fname (format-time-string "%d-%B-%Y-%A.org" (current-time)))
+         (dir   (expand-file-name org-roam-dailies-directory
+                                  org-roam-directory)))
+    (expand-file-name fname dir)))
+
+(defun my/roam-dailies-goto-or-capture-today ()
+  "If today’s daily file exists, `goto` it; otherwise `capture` it."
+  (interactive)
+  (let ((file (my/roam-dailies--today-filepath)))
+    ;; ensure the dailies directory is there
+    (unless (file-directory-p (file-name-directory file))
+      (make-directory (file-name-directory file) :parents))
+    (if (file-exists-p file)
+        ;; ── already there → just visit it ──
+        (org-roam-dailies-goto-today)
+      ;; ── absent → create via your capture template “d” ──
+      (org-roam-dailies-capture-today))))
+
+(defun my/org-agenda-single-day (date)
+  "Select DATE via calendar and show exactly that day’s agenda."
+  (interactive
+   (list (org-read-date nil t nil "Agenda date: "))) ;; returns a time-value
+  (let ((org-agenda-start-day (format-time-string "%Y-%m-%d" date))
+        (org-agenda-span 1))
+    (org-agenda-list)))
+
+;; Bind this to C-c n I
+(defun org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+
+
+(defun myorg-roam-node-find-with-region ()
+  "Call `org-roam-node-find` with the selected region as initial input."
+  (interactive)
+  (if (use-region-p)
+      (let ((initial-input (buffer-substring-no-properties
+                           (region-beginning) (region-end))))
+        (org-roam-node-find nil initial-input))
+    (org-roam-node-find)))
+
+(global-set-key (kbd "s-d") 'my/roam-dailies-goto-or-capture-today)
+(global-set-key (kbd "s-c") 'my/roam-daily-open-or-create)
 (global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
 (global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
 (global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
+(global-set-key (kbd "s-t") (lambda () (interactive) (org-capture nil "tt")))
+(global-set-key (kbd "s-q") 'org-roam-node-insert-immediate)
+(global-set-key (kbd "s-i") 'org-roam-node-insert)
+(global-set-key (kbd "C-c a") 'org-agenda)
 
 ;; After org is loaded, remove TAB’s org-cycle binding so the global TAB works
 ;(with-eval-after-load 'org
@@ -337,3 +398,20 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
 
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "<backtab>") nil))
+
+;;;;;; 1.  Keep your current windows and restore them after quitting the agenda
+;;(setq org-agenda-window-setup 'other-window
+;;      org-agenda-restore-windows-after-quit t)
+
+;;;; 2.  Show *Org Agenda* in a right‑side window (≈ 50 % of the frame)
+(add-to-list
+ 'display-buffer-alist
+ '("^\\*Org Agenda\\*$"                           ; any agenda buffer
+   (display-buffer-reuse-window                  ; ► first try to reuse…
+    display-buffer-in-side-window)               ; ► …else make a side‑window
+   (side         . right)                        ; right edge of the frame
+   (slot         . 0)                            ; topmost slot on that side
+   (window-width . 0.50)                         ; half the frame’s width
+   ;; optional niceties
+   (window-parameters . ((no-delete-other-windows . t) ; keep layout stable
+                         (no-other-window        . nil))))) ; M‐p / M‐n ignore
