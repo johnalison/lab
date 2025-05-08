@@ -99,13 +99,16 @@
        ;;("@home" . ?H)
        ;;("@work" . ?W)
        ("meeting" . ?m)
-       ("planning" . ?p)
+       ;;("planning" . ?p)
        ("teaching" . ?t)
+       ("emacs" . ?e)
        ("HGC" . ?H)
-       ("4b" . ?f)
-       ("publish" . ?P)
-       ("note" . ?n)
-       ("question" . ?q)))
+       ("4b" . ?4)
+       ("bbWW" . ?W)
+       ;;("publish" . ?P)
+       ("idea" . ?i)
+       ("question" . ?q)
+       ))
 
 
   ;; Configure custom agenda views
@@ -271,11 +274,11 @@
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       (file "~/RoamNotes/Templates/DailyTemplate.org")
-      :target (file+head "%<%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n")))
+      :target (file+head "%<%Y/%B/%d-%B-%Y-%A>.org" "#+title: %<%d %B %Y %A>\n")))
    )
   (org-roam-capture-templates
    '(("d" "default" plain
-      "\n\n * %?\n"
+      "\n\n %?\n"
       :if-new (file+head "Notes/${slug}-%<%Y%m%d%H%M%S>.org" "#+title: ${title}\n")
       :unnarrowed t)))
   :bind (("C-c n l" . org-roam-buffer-toggle)
@@ -307,83 +310,83 @@
 ;;;  Org‑roam daily: open‑or‑create (always ask for a date)
 ;;; ------------------------------------------------------------
 
-;; ---------- helper: build the daily file path ---------------------------
-(defun my/roam-daily--filepath (time)
-  "Return the absolute path of the Org-roam daily note for TIME."
-  (let* ((name (format-time-string "%d-%B-%Y-%A.org" time))
-         (dir  (expand-file-name org-roam-dailies-directory
-                                 org-roam-directory)))
-    (expand-file-name name dir)))
+;;;; ---------- helper: build the daily file path ---------------------------
+;;(defun my/roam-daily--filepath (time)
+;;  "Return the absolute path of the Org-roam daily note for TIME."
+;;  (let* ((name (format-time-string "%d-%B-%Y-%A.org" time))
+;;         (dir  (expand-file-name org-roam-dailies-directory
+;;                                 org-roam-directory)))
+;;    (expand-file-name name dir)))
 
-;; ---------- main command -------------------------------------------------
-(defun my/roam-daily-open-or-create ()
-  "Prompt for a date, then open that daily note or create it from template.
+;;;; ---------- main command -------------------------------------------------
+;;(defun my/roam-daily-open-or-create ()
+;;  "Prompt for a date, then open that daily note or create it from template.
+;;
+;;The capture template identified by key \"d\" in
+;;`org-roam-dailies-capture-templates' is used when the note does not yet
+;;exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
+;;  (interactive)
+;;  ;; `org-read-date' → time value because 2nd arg = t
+;;  (let* ((time (org-read-date nil t nil "Date (pick in calendar): "))
+;;         (file (my/roam-daily--filepath time)))
+;;    ;; create parent directory on first use
+;;    (unless (file-directory-p (file-name-directory file))
+;;      (make-directory (file-name-directory file) :parents))
+;;    (if (file-exists-p file)
+;;        ;; ─── file exists → just open it (GOTO = t) ───
+;;        (org-roam-dailies--capture time t "d")
+;;      ;; ─── file absent → create via template "d" (GOTO = nil) ───
+;;      (org-roam-dailies--capture time nil "d"))))
+;;
+;;
+;;(defun my/roam-dailies--today-filepath ()
+;;  "Return the absolute path of today’s Org-roam daily note."
+;;  (let* ((fname (format-time-string "%d-%B-%Y-%A.org" (current-time)))
+;;         (dir   (expand-file-name org-roam-dailies-directory
+;;                                  org-roam-directory)))
+;;    (expand-file-name fname dir)))
+;;
+;;(defun my/roam-dailies-goto-or-capture-today ()
+;;  "If today’s daily file exists, `goto` it; otherwise `capture` it."
+;;  (interactive)
+;;  (let ((file (my/roam-dailies--today-filepath)))
+;;    ;; ensure the dailies directory is there
+;;    (unless (file-directory-p (file-name-directory file))
+;;      (make-directory (file-name-directory file) :parents))
+;;    (if (file-exists-p file)
+;;        ;; ── already there → just visit it ──
+;;        (org-roam-dailies-goto-today)
+;;      ;; ── absent → create via your capture template “d” ──
+;;      (org-roam-dailies-capture-today))))
+;;
+;;(defun my/org-agenda-single-day (date)
+;;  "Select DATE via calendar and show exactly that day’s agenda."
+;;  (interactive
+;;   (list (org-read-date nil t nil "Agenda date: "))) ;; returns a time-value
+;;  (let ((org-agenda-start-day (format-time-string "%Y-%m-%d" date))
+;;        (org-agenda-span 1))
+;;    (org-agenda-list)))
+;;
+;;;; Bind this to C-c n I
+;;(defun org-roam-node-insert-immediate (arg &rest args)
+;;  (interactive "P")
+;;  (let ((args (cons arg args))
+;;        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+;;                                                  '(:immediate-finish t)))))
+;;    (apply #'org-roam-node-insert args)))
+;;
+;;
+;;(defun myorg-roam-node-find-with-region ()
+;;  "Call `org-roam-node-find` with the selected region as initial input."
+;;  (interactive)
+;;  (if (use-region-p)
+;;      (let ((initial-input (buffer-substring-no-properties
+;;                           (region-beginning) (region-end))))
+;;        (org-roam-node-find nil initial-input))
+;;    (org-roam-node-find)))
 
-The capture template identified by key \"d\" in
-`org-roam-dailies-capture-templates' is used when the note does not yet
-exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
-  (interactive)
-  ;; `org-read-date' → time value because 2nd arg = t
-  (let* ((time (org-read-date nil t nil "Date (pick in calendar): "))
-         (file (my/roam-daily--filepath time)))
-    ;; create parent directory on first use
-    (unless (file-directory-p (file-name-directory file))
-      (make-directory (file-name-directory file) :parents))
-    (if (file-exists-p file)
-        ;; ─── file exists → just open it (GOTO = t) ───
-        (org-roam-dailies--capture time t "d")
-      ;; ─── file absent → create via template "d" (GOTO = nil) ───
-      (org-roam-dailies--capture time nil "d"))))
-
-
-(defun my/roam-dailies--today-filepath ()
-  "Return the absolute path of today’s Org-roam daily note."
-  (let* ((fname (format-time-string "%d-%B-%Y-%A.org" (current-time)))
-         (dir   (expand-file-name org-roam-dailies-directory
-                                  org-roam-directory)))
-    (expand-file-name fname dir)))
-
-(defun my/roam-dailies-goto-or-capture-today ()
-  "If today’s daily file exists, `goto` it; otherwise `capture` it."
-  (interactive)
-  (let ((file (my/roam-dailies--today-filepath)))
-    ;; ensure the dailies directory is there
-    (unless (file-directory-p (file-name-directory file))
-      (make-directory (file-name-directory file) :parents))
-    (if (file-exists-p file)
-        ;; ── already there → just visit it ──
-        (org-roam-dailies-goto-today)
-      ;; ── absent → create via your capture template “d” ──
-      (org-roam-dailies-capture-today))))
-
-(defun my/org-agenda-single-day (date)
-  "Select DATE via calendar and show exactly that day’s agenda."
-  (interactive
-   (list (org-read-date nil t nil "Agenda date: "))) ;; returns a time-value
-  (let ((org-agenda-start-day (format-time-string "%Y-%m-%d" date))
-        (org-agenda-span 1))
-    (org-agenda-list)))
-
-;; Bind this to C-c n I
-(defun org-roam-node-insert-immediate (arg &rest args)
-  (interactive "P")
-  (let ((args (cons arg args))
-        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-                                                  '(:immediate-finish t)))))
-    (apply #'org-roam-node-insert args)))
-
-
-(defun myorg-roam-node-find-with-region ()
-  "Call `org-roam-node-find` with the selected region as initial input."
-  (interactive)
-  (if (use-region-p)
-      (let ((initial-input (buffer-substring-no-properties
-                           (region-beginning) (region-end))))
-        (org-roam-node-find nil initial-input))
-    (org-roam-node-find)))
-
-(global-set-key (kbd "s-d") 'my/roam-dailies-goto-or-capture-today)
-(global-set-key (kbd "s-c") 'my/roam-daily-open-or-create)
+(global-set-key (kbd "s-d") 'org-roam-dailies-goto-today)
+(global-set-key (kbd "s-c") 'org-roam-dailies-goto-date)
 (global-set-key (kbd "s-a") (lambda () (interactive) (org-agenda nil "d")))
 (global-set-key (kbd "C-s-{") 'org-roam-dailies-find-previous-note)
 (global-set-key (kbd "C-s-}") 'org-roam-dailies-find-next-note)
@@ -391,6 +394,7 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
 (global-set-key (kbd "s-q") 'org-roam-node-insert-immediate)
 (global-set-key (kbd "s-i") 'org-roam-node-insert)
 (global-set-key (kbd "C-c a") 'org-agenda)
+
 
 ;; After org is loaded, remove TAB’s org-cycle binding so the global TAB works
 ;(with-eval-after-load 'org
@@ -415,3 +419,55 @@ exist.  (Typical body: \"%[~/RoamNotes/Templates/DailyTemplate.org]\")"
    ;; optional niceties
    (window-parameters . ((no-delete-other-windows . t) ; keep layout stable
                          (no-other-window        . nil))))) ; M‐p / M‐n ignore
+
+
+(defun org-roam-dailies--list-files-recursively ()
+  "List all Org files in `org-roam-dailies-directory' and its subdirectories."
+  (let ((dailies-dir (expand-file-name org-roam-dailies-directory org-roam-directory)))
+    (directory-files-recursively dailies-dir "\\.org$")))
+
+(advice-add 'org-roam-dailies--list-files :override #'org-roam-dailies--list-files-recursively)
+(setq org-startup-with-latex-preview t)
+(setq org-startup-with-inline-images t)
+(setq org-image-actual-width '(300))
+
+;; adjust image size, scale, background, etc.
+(setq org-format-latex-options
+      ;; (see C-h v org-format-latex-options for all settings)
+      '(:foreground default :background default
+        :scale 2.0   ; 1.0 = 100% size
+        :html-foreground "Black" :html-background "Transparent"
+        :html-scale 1.0))
+
+
+
+(use-package consult-org-roam
+   :ensure t
+   :after org-roam
+   :init
+   (require 'consult-org-roam)
+   ;; Activate the minor mode
+   (consult-org-roam-mode 1)
+   :custom
+   ;; Use `ripgrep' for searching with `consult-org-roam-search'
+   ;(consult-org-roam-grep-func #'consult-ripgrep)
+   ;; Configure a custom narrow key for `consult-buffer'
+   (consult-org-roam-buffer-narrow-key ?r)
+   ;; Display org-roam buffers right after non-org-roam buffers
+   ;; in consult-buffer (and not down at the bottom)
+   (consult-org-roam-buffer-after-buffers t)
+   :config
+   ;; Eventually suppress previewing for certain functions
+   (consult-customize
+    consult-org-roam-forward-links
+    :preview-key "M-.")
+   :bind
+   ;; Define some convenient keybindings as an addition
+   ("C-c n e" . consult-org-roam-file-find)
+   ("C-c n b" . consult-org-roam-backlinks)
+   ("C-c n B" . consult-org-roam-backlinks-recursive)
+   ("C-c n l" . consult-org-roam-forward-links)
+   ("C-c n g" . consult-org-roam-search))
+
+
+(global-set-key (kbd "C-c n b") 'consult-org-roam-backlinks)
