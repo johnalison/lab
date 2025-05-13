@@ -450,18 +450,19 @@
 
 (global-set-key (kbd "C-c n b") 'consult-org-roam-backlinks)
 
-
 (defun my/org-notes-auto-commit ()
-  "Auto-commit and push changes in the notes repository."
-  (let ((default-directory "~/RoamNotes")) ;; customize this path
+  "Auto-commit and push all changes in the notes repository, including untracked files."
+  (let ((default-directory "~/RoamNotes")) ;; Replace with your notes repo path
     (when (file-directory-p default-directory)
       (require 'magit)
-      (when (or (magit-anything-modified-p) (magit-untracked-files))
-        (magit-stage-modified)
-	(magit-stage-untracked)
-        (when (magit-anything-staged-p)
-          (magit-commit-create
-           `("-m" ,(format "Auto-commit notes: %s" (format-time-string "%F %T")))))
-        (magit-push-current-to-pushremote nil)))))
+      ;; Save all modified buffers before Git actions
+      (save-some-buffers t)
+      ;; Stage all changes
+      (magit-run-git "add" "-A")
+      ;; Commit only if something is staged
+      (when (magit-staged-files)
+        (magit-commit-create
+         `("-m" ,(format "Auto-commit notes: %s" (format-time-string "%F %T"))))
+	(magit-push-current-to-pushremote nil)))))
 
 (run-at-time "0 min" 600 #'my/org-notes-auto-commit)
